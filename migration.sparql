@@ -1,0 +1,36 @@
+PREFIX d1148: <http://data-gov.tw.rpi.edu/vocab/p/1146/>
+PREFIX dgp1356: <http://data-gov.tw.rpi.edu/vocab/p/1356/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+SELECT distinct(?state_name) ?in_exempt_num ?to_code ?state_agi07 ?state_fipscode ?return_num
+WHERE 
+{
+    graph <http://data-gov.tw.rpi.edu/vocab/Dataset_1148>   
+    {
+        ?s d1148:state_abbrv ?state_abbrv .
+        ?s d1148:state_name ?state_name .
+        ?s d1148:years "2007-2008" .
+        ?s d1148:county_code_origin "000" .
+        ?s d1148:exmpt_num ?in_exempt_num .
+        ?s d1148:state_code_dest ?to_code .
+        ?s d1148:state_code_origin ?from_code .
+		?s d1148:return_num ?return_num .
+     }
+  
+     graph <http://data-gov.tw.rpi.edu/vocab/Dataset_1356>
+    {
+         ?s2 dgp1356:county_code "000" .
+         ?s2 dgp1356:year "2007" .
+         ?s2 dgp1356:state_abbrv ?state_abbrv1 .
+         ?s2 dgp1356:agi ?state_agi07 .
+         ?s2 dgp1356:state_code  ?state_fipscode .
+         ?s2 dgp1356:exmpt_num ?in_exempt_num1 .
+    }
+    filter(?from_code != ?to_code)
+    filter(?from_code = ?state_fipscode)
+    filter(?state_abbrv = ?state_abbrv1)
+
+    
+}
+
+order by ?state_name
+LIMIT 3000

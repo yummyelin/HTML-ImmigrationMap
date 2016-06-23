@@ -1,0 +1,141 @@
+<html>
+<head>
+<STYLE type="text/css">
+ h2 {
+   padding: 0.2em;
+  }
+ 
+ </STYLE>
+	<title>Variations in state income based on interstate migration</title>
+	<script type='text/javascript' src='http://www.google.com/jsapi'></script>
+	<script type='text/javascript'>
+	google.load("visualization", "1", {packages:["geomap"]});
+
+	google.setOnLoadCallback(drawMap);
+	
+	function drawMap() 	{        			
+		// Query, service, and url
+	    var queryurl = "projectData-2007.js";
+		var query = new google.visualization.Query(queryurl);
+
+		// Send the query.
+		query.send(handleQueryResponse);
+	};   
+	
+	function handleQueryResponse(response) {
+		if (response.isError()) {
+			alert('Error in query: ' + 
+			   response.getMessage() + ' ' + 
+			   response.getDetailedMessage());
+			return;
+		}
+		var data = response.getDataTable();
+		
+		// Make sure our data isn't empty.
+		if (null==data) return;
+		
+		var newdata = new google.visualization.DataTable();
+		newdata.addColumn('string', 'State');
+		newdata.addColumn('number', 'Inflow number/AGI');
+		newdata.addColumn('string', 'Net Inflow');
+	
+		
+		var rows = data.getNumberOfRows();
+		var inSum = null;
+		var outSum = null;
+		for (var i = 0; i < rows; i++ ){
+			var state = data.getValue(i,0);
+			var inNumber = data.getValue(i,1);
+            var agi = data.getValue(i,3);
+			var fipscode = data.getValue(i,4);
+			var outNumber = data.getValue(i,5);
+			
+			var percent;
+			var netSum = 0;
+			var sum = null;
+			var state;
+			if(i != 0){
+			   if(fipscode == data.getValue(i-1,4)){
+				  inSum = inSum + inNumber;		
+				  outSum = outSum + outNumber;
+				}else{					
+				    
+					netSum = inSum-outSum;
+					percent = (netSum /agi)*100000;
+					state = 'State:' + data.getValue(i-1,0);
+					sum = state+'\n NetInflow: '+Math.round(netSum);
+					
+					newdata.addRow([data.getValue(i-1,0),Math.round(percent)/100,sum]);
+			
+					inSum = 0;
+					outSum = 0;
+				}	
+			}else{
+				inSum = inNumber;
+				outSum = outNumber;
+			}
+		}
+		var options = {};
+			options['region'] = 'US';
+			options['dataMode'] = 'regions';
+			options['width'] = 700;
+			options['height'] = 450;
+			options['colors'] = [0xEEEEFF, 0x3030FF];
+		
+		
+		var container = document.getElementById('map_canvas');
+		var geomap = new google.visualization.GeoMap(container);
+		geomap.draw(newdata, options);
+		
+	};	
+	</script>
+	
+</head>
+<body style="font-family:Verdana; border: 0 none;" align="center">
+	<div id='title'>
+		<h2><b>Variations in state income based on interstate migration</b></h2>
+	</div>
+	</br>
+	</br></br>
+	<div id='description' align="left">
+	<h3><u>Description</u></h3>
+		<p>This project shows the percentage of change in income in each state with the total number of people migrated from the state
+        </p>
+	</div>
+	</br>
+	<div id='consumer' align="left">
+	<h3><u>Interested Consumer Group</u></h3>
+		<p>1. People who want to migrate from one state to another  </p>
+		<p>2. Property builders who want to set up business in new state  </p>
+		<p>2. Government officials who want to study impact of migration in states  </p>
+	</div>
+	
+	<div id='demos' align="left">
+		<h3>Interstate Migration without dataset Mash ups</h3>
+		<p> <a href="migration-interstate.html"> Interstate Migration for year 2007 </a></p> 
+		<p></p>
+		<h3>State Income vs Net Inflow Migration yearwise</h3>
+		<p> <a href="migration-2007.html"> State Income vs Net Inflow Migration for year 2007 </a></p> 
+		<p> <a href="migration-2006.html"> State Income vs Net Inflow Migration for year 2006 </a></p>
+		<p> <a href="migration-2005.html"> State Income vs Net Inflow Migration for year 2005 </a></p> 
+		<p> <a href="migration-2004.html"> State Income vs Net Inflow Migration for year 2004 </a></p>
+		
+		
+		<h3><u>Conclusion</u></h3>
+		<p>This demo shows that North Carolina has highest net population inflow vs income in the year 2007. It was Georgia in 2006, Texas in 2005 and Pennsylvania in 2004.
+		</b> </p>
+		<h4><u>Datasets Used</u></h4>
+		<p><a href="http://data-gov.tw.rpi.edu/wiki/Dataset_1148">Dataset 1148 - State-to-State Migration Inflow</a></p>
+		<p><a href="http://data-gov.tw.rpi.edu/wiki/Dataset_1356">Dataset 1356 - Tax Year County Income Data</a></p>		
+		</p>
+		<p></p>
+		<p></p>		
+	</div>	
+	<div id='info' align="left" >
+		<h4>Information</font></h4>
+		<p>Course: CS6301 Semantic Web</p>
+		<p>Instructor: Steven Seida</p>
+		<p>Authors:  Yilin Gan, Sonal Hundekari</p>
+	</div>
+</body>
+</html>

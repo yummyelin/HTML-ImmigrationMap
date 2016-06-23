@@ -1,0 +1,109 @@
+<html>
+<head>
+<STYLE type="text/css">
+ #info {
+   padding: 0.2em;
+  }
+ 
+ </STYLE>
+	<title>Variations in state income based on interstate migration</title>
+	<script type='text/javascript' src='http://www.google.com/jsapi'></script>
+	<script type='text/javascript'>
+	google.load("visualization", "1", {packages:["geomap"]});
+	google.setOnLoadCallback(drawMap);
+	
+	function drawMap() 	{        			
+		// Query, service, and url
+		//var queryloc = "http://data-gov.tw.rpi.edu/demo/stable/demo-10040-broadband-home.sparql";
+		//var service = "http://data-gov.tw.rpi.edu:8080/joseki/sparql/tdb-datagov";
+		//var queryurl = 'http://data-gov.tw.rpi.edu/ws/sparqlproxy.php?output=gvds&query-uri=' + encodeURIComponent(queryloc) + '&service-uri=' + encodeURIComponent(service);
+		var queryurl = "project3000-data.js";
+		var query = new google.visualization.Query(queryurl);
+
+		// Send the query.
+		query.send(handleQueryResponse);
+	};   
+	
+	function handleQueryResponse(response) {
+		if (response.isError()) {
+			alert('Error in query: ' + 
+			   response.getMessage() + ' ' + 
+			   response.getDetailedMessage());
+			return;
+		}
+		var data = response.getDataTable();
+		
+		// Make sure our data isn't empty.
+		if (null==data) return;
+		
+		var newdata = new google.visualization.DataTable();
+		newdata.addColumn('string', 'State');
+		newdata.addColumn('number', 'Inflow number/AGI');
+		/*newdata.addColumn('string', 'Inflow population');
+		newdata.addColumn('string', 'Outflow population');
+		newdata.addColumn('string', 'AGI');*/
+		
+		var rows = data.getNumberOfRows();
+		var inSum = null;
+		for (var i = 0; i < rows; i++ ){
+			var state = data.getValue(i,0);
+			var inNumber = data.getValue(i,1);
+            var agi = data.getValue(i,3);
+			var fipscode = data.getValue(i,4);
+			var percent;
+			if(i != 0){
+			   if(fipscode == data.getValue(i-1,4)){
+				  inSum = inSum + inNumber;	
+					if(i ==rows-1){
+						percent = (inSum /agi)*100000;
+						newdata.addRow([data.getValue(i-1,0),Math.round(percent)/100]);
+					}
+				}else{					
+				    percent = (inSum /agi)*100000;
+					newdata.addRow([data.getValue(i-1,0),Math.round(percent)/100]);
+					inSum = 0;
+				}	
+			}else{
+				inSum = inNumber;
+			}
+		}
+		var options = {};
+			options['region'] = 'US';
+			options['dataMode'] = 'regions';
+			options['width'] = 700;
+			options['height'] = 450;
+			options['colors'] = [0xEEEEFF, 0x3030FF];
+		
+		var container = document.getElementById('map_canvas');
+		var geomap = new google.visualization.GeoMap(container);
+		geomap.draw(newdata, options);
+	}	
+	</script>
+	
+</head>
+<body style="font-family:Verdana; border: 0 none;" align="center">
+	<div id='title'>
+		<h2><b>Variations in state income based on interstate migration</b></h2>
+	</div>
+	<div id='map_canvas'></div>	
+	<div id='description' align="left">
+		<h4><u>Description</u></h4>
+		<p>This project shows the percentage of change in income in each state with the total number of people migrated from the state
+              </p>
+		<h4><u>Conclusion</u></h4>
+		<p>This demo shows that North Carolina has highest population inflow vs income in the year 2007. </p>
+		<h4><u>Datasets Used</u></h4>
+		<p><a href="http://data-gov.tw.rpi.edu/wiki/Dataset_1148">Dataset 1148 - State-to-State Migration Inflow</a></p>
+		<p><a href="http://data-gov.tw.rpi.edu/wiki/Dataset_1356">Dataset 1356 - Tax Year County Income Data</a></p>		
+		</p>
+		<p></p>
+		<p></p>		
+	</div>	
+	<div id='info' align="left" >
+		<h4>Information</font></h4>
+		<p>Course: CS6301 Semantic Web</p>
+		<p>Instructor: Steven Seida</p>
+		<p>Authors:  Yilin Gan, Sonal Hundekari</p>
+	</div>
+</body>
+</html>
